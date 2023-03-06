@@ -8,7 +8,7 @@ use Symfony\Component\HttpFoundation\Request;
 class SeriesController extends Controller{
     public function index() {
 
-        $series = Serie::all();
+        $series = serie::query()->orderBy(column: 'nome') -> get();
         return view('series.index', compact('series'));
     
     }
@@ -20,6 +20,6 @@ class SeriesController extends Controller{
     public function store(Request $request){
     $serie = Serie::create($request->all());
 
-    echo "Série com id ($serie->id) criada: ($serie->nome)";
+    return redirect(to: '/series');
 }
 }
