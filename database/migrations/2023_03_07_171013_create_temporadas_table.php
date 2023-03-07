@@ -11,12 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
+        Schema::create('temporadas', function (Blueprint $table) {
+            $table->id();
+            $table->integer('numero');
+            $table->timestamps();
+            $table->integer('serie_id');
+            $table->foreign('serie_id')
+            ->references('id')
+            ->on('series');
 
-        Schema::create('series', function(Blueprint $table) {
-            $table->string('nome');
-            $table->increments(column:'id');
         });
-        
     }
 
     /**
@@ -24,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('series');
+        Schema::dropIfExists('temporadas');
     }
 };

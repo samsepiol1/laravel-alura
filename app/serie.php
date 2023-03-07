@@ -1,5 +1,6 @@
 <?php
 namespace App;
+use App\Models\Temporada;
 use Illuminate\Database\Eloquent\Model;
 
 class Serie extends Model{
@@ -10,6 +11,10 @@ class Serie extends Model{
 
 
     protected $fillable = ['nome'];
+
+    public function Temporadas(){
+        return $this->hasMany( related: Temporada::class);
+    }
 
 
 }
