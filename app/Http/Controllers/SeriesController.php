@@ -2,11 +2,17 @@
 
 namespace App\Http\Controllers;
 use App\Http\Requests\SeriesFormRequest;
+use App\Models\Episodio;
+use App\Models\Temporada;
 use App\Serie;
+use App\Services\CriadorDeSerie;
 use Symfony\Component\HttpFoundation\Request;
 
 
 
+/**
+ * Summary of SeriesController
+ */
 class SeriesController extends Controller{
     public function index(Request $request) {
 
@@ -24,42 +30,46 @@ class SeriesController extends Controller{
     }
 
 
-    public function store(SeriesFormRequest $request)
+   
+    public function store(SeriesFormRequest $request, CriadorDeSerie $criadorDeSerie)
     {
-        $serie = Serie::create(['nome' => $request->nome]);
-        $qtdTemporadas = $request->qtd_temporadas;
-        for ($i = 1; $i <= $qtdTemporadas; $i++) {
-            $temporada = $serie->temporadas()->create(['numero' => $i]);
-    
-            for ($j = 1; $j <= $request->ep_por_temporada; $j++) {
-                $temporada->episodios()->create(['numero' => $j]);
-            }
-        }
-        $request->session()
-            ->flash(
-                'mensagem',
-                "Série {$serie->id} e duas temporadas e episódios criados com sucesso {$serie->nome}"
-            );
-    
-        return redirect()->route('listar_series');
+        $serie = $criadorDeSerie->criarSerie(
+            $request->nome, 
+            $request->qtd_temporadas, 
+            $request->ep_por_temporada
+        );
     }
 
-    public function destroy (Request $request)
+    public function destroy(Request $request)
+{
 
-    {
+    $serie = Serie::find($request->id);
+    $nomeSerie = $serie->nome;
+    $serie->temporadas->each(function (Temporada $temporada) {
+        $temporada->episodios()->each(function(Episodio $episodio) {
+            $episodio->delete();
+        });
+        $temporada->delete();
 
+    });
+    $serie->delete();
 
-
-        Serie::destroy($request->id);
-        $request->session()
+    Serie::destroy($request->id);
+    $request->session()
         ->flash(
             'mensagem',
-            "Série removida com sucesso"
-            );
+            "Série $nomeSerie removida com sucesso"
+        );
+    return redirect()->route('listar_series');
+}
 
-            return redirect()->route( route: 'listar_series');
-
-    }
+public function editaNome($id, Request $request)
+{
+    $novoNome = $request->nome;
+    $serie = Serie::find($id);
+    $serie->nome = $novoNome;
+    $serie->save();
+}
 
 
 
